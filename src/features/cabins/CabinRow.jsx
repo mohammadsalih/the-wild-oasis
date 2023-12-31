@@ -1,4 +1,15 @@
 import styled from "styled-components";
+import toast from "react-hot-toast";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { HiEllipsisVertical } from "react-icons/hi2";
+
+import { formatCurrency } from "../../utils/helpers";
+import { deleteCabin } from "../../services/apiCabins";
+
+import ButtonIcon from "../../ui/ButtonIcon";
+import Spinner from "../../ui/Spinner";
 
 const TableRow = styled.div`
   display: grid;
@@ -38,3 +49,49 @@ const Discount = styled.div`
   font-weight: 500;
   color: var(--color-green-700);
 `;
+
+function CabinRow({ cabin }) {
+  const {
+    image,
+    name,
+    maxCapacity,
+    regularPrice,
+    discount,
+    id: cabinId,
+  } = cabin;
+
+  const queryClient = useQueryClient();
+
+  const { isLoading: isDeleting, mutate: deleteCabinFn } = useMutation({
+    mutationFn: deleteCabin,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cabins"],
+      });
+
+      toast.success("cabin got deleted successfully ");
+    },
+    onError: (err) => {
+      console.log(`we could not delete the cabin , error : ${err}`);
+
+      toast.error("we could not delete the cabin");
+    },
+  });
+
+  if (isDeleting) return <Spinner />;
+
+  return (
+    <TableRow role="row">
+      <Img src={image} />
+      <Cabin>{name}</Cabin>
+      <div>Fits up to {maxCapacity} guests</div>
+      <Price>{regularPrice}</Price>
+      <Discount>{formatCurrency(discount)}</Discount>
+      <ButtonIcon onClick={() => deleteCabinFn(cabinId)}>
+        <HiEllipsisVertical />
+      </ButtonIcon>
+    </TableRow>
+  );
+}
+
+export default CabinRow;
