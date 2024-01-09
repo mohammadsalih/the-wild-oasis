@@ -6,8 +6,6 @@ const Input = styled.input`
   font-size: 1.4rem;
   font-weight: 500;
 
-  color: var(--color-brand-50);
-
   border: 1px solid var(--color-grey-300);
   border-radius: var(--border-radius-sm);
 
